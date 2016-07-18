@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_venues"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="monte.apps.interviewapp.activities.VenuesActivity">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/splitter"
+        tools:context="monte.apps.interviewapp.activities.VenuesActivity"
+        tools:layout="@layout/map_layout"/>
+
+    <View
+        android:id="@+id/splitter"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_centerVertical="true"/>
+
+    <fragment
+        android:id="@+id/list"
+        android:name="monte.apps.interviewapp.fragments.VenueFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/splitter"
+        tools:context="monte.apps.interviewapp.activities.VenuesActivity"
+        tools:layout="@layout/fragment_venue_list"/>
+</RelativeLayout>
