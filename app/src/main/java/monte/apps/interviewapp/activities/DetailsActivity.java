@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -27,15 +28,23 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DetailsActivity extends AppCompatActivity {
-    /** Logging tag. */
+    /**
+     * Logging tag.
+     */
     private static final String TAG = "DetailsActivity";
 
     private static final String EXTRA_VENUE = "extra_venue";
 
-    @BindView(R.id.photo_image_view) ImageView mImageView;
-    @BindView(R.id.venue_icon_image_view) ImageView mIconImageView;
-    @BindView(R.id.venue_name_text_view) TextView mNameTextView;
-    @BindView(R.id.venue_address_text_view) TextView mAddressTextView;
+    @BindView(R.id.photo_image_view)
+    ImageView mImageView;
+    @BindView(R.id.venue_icon_image_view)
+    ImageView mIconImageView;
+    @BindView(R.id.venue_name_text_view)
+    TextView mNameTextView;
+    @BindView(R.id.venue_address_text_view)
+    TextView mAddressTextView;
+    @BindView(R.id.toolbar_layout)
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
 
     private Venue mVenue;
 
@@ -52,11 +61,12 @@ public class DetailsActivity extends AppCompatActivity {
 
         ButterKnife.bind(this, findViewById(android.R.id.content));
 
+        mVenue = (Venue) getIntent().getSerializableExtra(EXTRA_VENUE);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        mVenue = (Venue) getIntent().getSerializableExtra(EXTRA_VENUE);
+        mCollapsingToolbarLayout.setTitle(mVenue.getName());
 
         getPhotos();
     }
@@ -90,7 +100,9 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void loadPhoto(Photo photo) {
-        String url = photo.getPrefix() + photo.getWidth() + "x" + photo.getHeight() + photo.getSuffix();
+        String url =
+                photo.getPrefix() + photo.getWidth() + "x" + photo.getHeight()
+                        + photo.getSuffix();
         Uri uri = Uri.parse(url);
         Picasso.with(this)
                 .load(uri)
