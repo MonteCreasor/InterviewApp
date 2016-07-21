@@ -5,6 +5,6 @@
     <color name="colorAccent">#FF4081</color>
 
     <!-- Grid view item state colors -->
-    <color name="grid_item_pressed">@color/colorAccent</color>
-    <color name="grid_item_selected_color_filter">#50FF4081</color>
+    <color name="item_pressed">@color/colorAccent</color>
+    <color name="item_selected_color_filter">#50FF4081</color>
 </resources>

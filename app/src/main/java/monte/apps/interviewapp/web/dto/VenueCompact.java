@@ -6,9 +6,7 @@ import java.util.List;
 /**
  * Created by monte on 2016-07-18.
  */
-public class Venue implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class VenueCompact implements Serializable {
     private String id;
     private String name;
     private Location location;
@@ -30,27 +28,37 @@ public class Venue implements Serializable {
         return location;
     }
 
-    public List<Category> getContact() {
-        return categories;
+    public Contact getContact() {
+        return contact;
     }
 
     public List<Category> getCategories() {
         return categories;
     }
 
-    public class HereNow implements Serializable {
-        private static final long serialVersionUID = 1L;
+    public Stats getStats() {
+        return stats;
+    }
 
+    public HereNow getHereNow() {
+        return hereNow;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+
+    public class HereNow implements Serializable {
         private int count;
         private String summary;
     }
 
     public class Stats implements Serializable {
-        private static final long serialVersionUID = 1L;
-
         private long checkinsCount;
         private long usersCount;
         private long tipCount;
+        private long visitsCount;
 
         public long getUsersCount() {
             return usersCount;
@@ -63,15 +71,18 @@ public class Venue implements Serializable {
         public long getCheckinsCount() {
             return checkinsCount;
         }
+
+        public long getVisitsCount() {
+            return visitsCount;
+        }
     }
 
     public class Location implements Serializable {
-        private static final long serialVersionUID = 1L;
-
         private String address;
         private double lat;
         private double lng;
         private List<String> formattedAddress;
+        private String crossStreet;
         private long distance;
 
         public String getAddress() {
@@ -93,11 +104,13 @@ public class Venue implements Serializable {
         public long getDistance() {
             return distance;
         }
+
+        public String getCrossStreet() {
+            return crossStreet;
+        }
     }
 
     public class Category implements Serializable {
-        private static final long serialVersionUID = 1L;
-
         private Icon icon;
         private String name;
         private String shortName;
@@ -116,8 +129,6 @@ public class Venue implements Serializable {
     }
 
     public class Contact implements Serializable {
-        private static final long serialVersionUID = 1L;
-
         private String phone;
         private String formattedPhone;
         private String twitter;
@@ -151,8 +162,6 @@ public class Venue implements Serializable {
     }
 
     public class Icon implements Serializable {
-        private static final long serialVersionUID = 1L;
-
         private String prefix;
         private String suffix;
 

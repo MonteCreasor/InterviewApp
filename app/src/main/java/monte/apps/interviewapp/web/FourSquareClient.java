@@ -1,5 +1,7 @@
 package monte.apps.interviewapp.web;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -18,8 +20,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class FourSquareClient {
-    public static final long VERSION = 20130815;
-    public static final long VERSION_PHOTOS = 20160718;
+    /** Logging tag. */
+    private static final String TAG = "FourSquareClient";
+
+    public static final String VERSION = "20160718";
     public static final int ICON_SIZE = 64;
 
     /**
@@ -33,6 +37,8 @@ public class FourSquareClient {
     private static final String CLIENT_SECRET_PARAM = "client_secret";
     private static final String ClientSecret =
             "5BTQVHFWLCQGMQPPZXTSAI4JT0AADCPBHCBC0RCKTP1DLLJX";
+    private static final String VERSION_PARAM = "v";
+
 
     private static FourSquareApi sFourSquareApi;
 
@@ -58,11 +64,13 @@ public class FourSquareClient {
                 HttpUrl url = originalHttpUrl.newBuilder()
                         .addQueryParameter(CLIENT_ID_PARAM, ClientID)
                         .addQueryParameter(CLIENT_SECRET_PARAM, ClientSecret)
+                        .addQueryParameter(VERSION_PARAM, VERSION)
                         .build();
 
                 // Request customization: add api key and secret.
                 Request.Builder requestBuilder = original.newBuilder().url(url);
                 Request request = requestBuilder.build();
+                Log.d(TAG, "Get URL: " + url);
                 return chain.proceed(request);
             }
         });

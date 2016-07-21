@@ -3,20 +3,52 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="16dp"
+    android:layout_margin="0dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="monte.apps.interviewapp.activities.DetailsActivity"
     tools:showIn="@layout/activity_details">
 
+    <!-- All the cards should be inserted into this LinearLayout -->
     <LinearLayout
+        android:id="@+id/card_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <include layout="@layout/include_address_card"/>
-        <include layout="@layout/include_contact_card"/>
-    </LinearLayout>
+        android:orientation="vertical"
+        android:paddingTop="@dimen/first_card_marginTop">
 
+        <monte.apps.interviewapp.views.ExpandingEntryCardView
+            android:id="@+id/no_data_card"
+            style="@style/ExpandingEntryCardStyle"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/expanding_entry_card_corner_radius"/>
+
+        <monte.apps.interviewapp.views.ExpandingEntryCardView
+            android:id="@+id/location_card"
+            style="@style/ExpandingEntryCardStyle"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/expanding_entry_card_corner_radius"/>
+
+        <monte.apps.interviewapp.views.ExpandingEntryCardView
+            android:id="@+id/contact_card"
+            style="@style/ExpandingEntryCardStyle"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/expanding_entry_card_corner_radius"/>
+
+        <monte.apps.interviewapp.views.ExpandingEntryCardView
+            android:id="@+id/stats_card"
+            style="@style/ExpandingEntryCardStyle"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/expanding_entry_card_corner_radius"/>
+
+        <monte.apps.interviewapp.views.ExpandingEntryCardView
+            android:id="@+id/comments_card"
+            style="@style/ExpandingEntryCardStyle"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/expanding_entry_card_corner_radius"/>
+
+    </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

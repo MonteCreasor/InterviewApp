@@ -1,13 +1,12 @@
 package monte.apps.interviewapp.web.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Created by monte on 2016-07-17.
  */
 
-public class VenuesDto implements Serializable {
+public class VenueDto implements Serializable {
     private Meta meta;
     private Response response;
 
@@ -19,14 +18,15 @@ public class VenuesDto implements Serializable {
         return response;
     }
 
-    public List<VenueCompact> getVenues() {
-        return getResponse().getVenues();
+    public VenueComplete getVenue() {
+        return getResponse().getVenue();
     }
 
     public class Response implements Serializable {
-        private List<VenueCompact> venues;
-        public List<VenueCompact> getVenues() {
-            return venues;
+        private VenueComplete venue;
+
+        public VenueComplete getVenue() {
+            return venue;
         }
     }
 }

@@ -6,7 +6,6 @@ import java.io.Serializable;
  * Created by monte on 2016-07-18.
  */
 public class Meta implements Serializable {
-
     private int code;
     private String requestId;
 

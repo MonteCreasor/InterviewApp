@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import monte.apps.interviewapp.R;
 import monte.apps.interviewapp.adapters.VenueRecyclerViewAdapter;
-import monte.apps.interviewapp.web.dto.Venue;
+import monte.apps.interviewapp.web.dto.VenueCompact;
 
 /**
  * A fragment representing a list of Items.
@@ -81,8 +81,8 @@ public class VenueFragment extends Fragment {
      * Other Fragments</a> for more information.
      */
     public interface VenueFragmentListener {
-        void onVenueClicked(Venue venue);
+        void onVenueClicked(VenueCompact venue);
 
-        void onVenueLongClicked(Venue item);
+        void onVenueLongClicked(VenueCompact item);
     }
 }

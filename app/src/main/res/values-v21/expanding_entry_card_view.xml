@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="SelectableItem" parent="@android:style/Theme.Material.Light">
+        <item name="android:background">?android:attr/selectableItemBackground
+        </item>
+    </style>
+
+    <style name="ExpandingEntryCardStyle" parent="BaseExpandingEntryCardStyle">
+        <item name="android:elevation">@dimen/expanding_entry_card_elevation
+        </item>
+    </style>
+</resources>

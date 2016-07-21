@@ -7,28 +7,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import monte.apps.interviewapp.R;
 import monte.apps.interviewapp.fragments.VenueFragment;
+import monte.apps.interviewapp.utils.Preconditions;
 import monte.apps.interviewapp.web.FourSquareClient;
-import monte.apps.interviewapp.web.dto.Venue;
-import monte.apps.interviewapp.web.dto.VenuesDto;
+import monte.apps.interviewapp.web.dto.VenueCompact;
 
 public class VenueRecyclerViewAdapter
         extends RecyclerView.Adapter<VenueRecyclerViewAdapter.ViewHolder> {
     /** Logging tag. */
     private static final String TAG = "VenueRecyclerViewAdapter";
 
-    private final List<Venue> mValues;
+    private final List<VenueCompact> mValues;
     private final VenueFragment.VenueFragmentListener mListener;
 
     public VenueRecyclerViewAdapter(
-            List<Venue> items,
+            List<VenueCompact> items,
             VenueFragment.VenueFragmentListener listener) {
         mValues = items;
         mListener = listener;
@@ -41,21 +43,51 @@ public class VenueRecyclerViewAdapter
         return new ViewHolder(view);
     }
 
+    /**
+     * Called when a view created by this adapter has been recycled.
+     * <p>
+     * <p>A view is recycled when a {@link LayoutManager} decides that it no longer needs to be
+     * attached to its parent {@link RecyclerView}. This can be because it has fallen out of
+     * visibility or a set of cached views represented by views still attached to the parent
+     * RecyclerView. If an item view has large or expensive data bound to it such as large bitmaps,
+     * this may be a good place to release those resources.</p>
+     * <p>
+     * RecyclerView calls this method right before clearing ViewHolder's internal data and sending
+     * it to RecycledViewPool. This way, if ViewHolder was holding valid information before being
+     * recycled, you can call {@link ViewHolder#getAdapterPosition()} to
+     * get its adapter position.
+     *
+     * @param holder The ViewHolder for the view being recycled
+     */
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        Venue venue = mValues.get(position);
+    public void onViewRecycled(ViewHolder holder) {
+        super.onViewRecycled(holder);
+        Picasso.with(holder.mView.getContext()).cancelRequest(holder.mImageView);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        final int stablePosition = holder.getAdapterPosition();
+        final VenueCompact venue = mValues.get(stablePosition);
         holder.mItem = venue;
 
-        List<Venue.Category> categories = venue.getCategories();
+        List<VenueCompact.Category> categories = venue.getCategories();
         if (categories.size() > 0 && categories.get(0).getIcon() != null) {
-            Venue.Icon icon = categories.get(0).getIcon();
+            if ("Museum of Healthcare".equals(venue.getName())) {
+                throw new AssertionError("fuckme");
+            }
+            VenueCompact.Icon icon = categories.get(0).getIcon();
             String path = icon.getPrefix()
                     + "bg_"
                     + FourSquareClient.ICON_SIZE
                     + icon.getSuffix();
             if (!TextUtils.isEmpty(path)) {
-                Picasso.with(holder.mView.getContext())
+                Glide.with(holder.mView.getContext())
                         .load(Uri.parse(path))
+                        .into(holder.mImageView);
+            } else {
+                Glide.with(holder.mView.getContext())
+                        .load("")
                         .into(holder.mImageView);
             }
         }
@@ -82,7 +114,7 @@ public class VenueRecyclerViewAdapter
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    mListener.onVenueClicked(holder.mItem);
+                    mListener.onVenueClicked(venue);
                 }
             }
         });
@@ -91,8 +123,10 @@ public class VenueRecyclerViewAdapter
             @Override
             public boolean onLongClick(View view) {
                 if (null != mListener) {
-                    mListener.onVenueLongClicked(holder.mItem);
+                    mListener.onVenueLongClicked(venue);
+                    return true;
                 }
+
                 return false;
             }
         });
@@ -108,7 +142,7 @@ public class VenueRecyclerViewAdapter
         public final ImageView mImageView;
         public final TextView mNameTextView;
         public final TextView mAddressTextView;
-        public Venue mItem;
+        public VenueCompact mItem;
 
         public ViewHolder(View view) {
             super(view);

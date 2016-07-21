@@ -1,6 +1,8 @@
 package monte.apps.interviewapp.web;
 
 import monte.apps.interviewapp.web.dto.PhotosDto;
+import monte.apps.interviewapp.web.dto.VenueComplete;
+import monte.apps.interviewapp.web.dto.VenueDto;
 import monte.apps.interviewapp.web.dto.VenuesDto;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -15,11 +17,18 @@ public interface FourSquareApi {
     @GET("venues/search")
     Call<VenuesDto> findVenues(
             @Query("ll") String latLng,
-            @Query("query") String query,
-            @Query("v") long v);
+            @Query("query") String query);
+
+    @GET("venues/search")
+    Call<VenuesDto> findVenuesNear(
+            @Query("near") String near,
+            @Query("query") String query);
 
     @GET("venues/{venueId}/photos")
     Call<PhotosDto> getVenuePhotos(
-            @Path("venueId") String venueId,
-            @Query("v") long v);
+            @Path("venueId") String venueId);
+
+    @GET("venues/{venueId}")
+    Call<VenueDto> getVenue(
+            @Path("venueId") String venueId);
 }

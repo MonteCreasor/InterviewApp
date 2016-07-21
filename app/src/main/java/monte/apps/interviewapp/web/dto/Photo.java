@@ -8,20 +8,32 @@ import java.io.Serializable;
  * Created by monte on 2016-07-18.
  */
 public class Photo implements Serializable {
-    private static final long serialVersionUID = 1L;
     private String id;
-    private Photos.Source source;
+    private Source source;
     private String prefix;
     private String suffix;
     private int width;
     private int height;
     private String visibility;
 
+    public class Source implements Serializable {
+        private String name;
+        private String url;
+
+        public String getName() {
+            return name;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+    }
+
     public String getId() {
         return id;
     }
 
-    public Photos.Source getSource() {
+    public Source getSource() {
         return source;
     }
 
