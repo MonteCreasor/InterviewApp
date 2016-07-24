@@ -36,7 +36,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailsActivity extends AppCompatActivity
+public class DetailsActivity extends BaseActivity
         implements ExpandingEntryCardView.ExpandingEntryCardViewListener {
 
     /**
@@ -298,7 +298,7 @@ public class DetailsActivity extends AppCompatActivity
             }
             */
 
-            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
+            entries.add(new ArrayList<>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -312,7 +312,7 @@ public class DetailsActivity extends AppCompatActivity
             );
 
             if (location.getDistance() > 0) {
-//                entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
+                entries.add(new ArrayList<>(1));
                 entries.get(entries.size() - 1).add(
                         new ExpandingEntryCardView.Builder()
                                 .id(-1)
@@ -325,7 +325,7 @@ public class DetailsActivity extends AppCompatActivity
             }
 
             if (!TextUtils.isEmpty(location.getCrossStreet())) {
- //               entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
+                entries.add(new ArrayList<>(1));
                 entries.get(entries.size() - 1).add(
                         new ExpandingEntryCardView.Builder()
                                 .id(-1)
@@ -353,7 +353,7 @@ public class DetailsActivity extends AppCompatActivity
             final Drawable phoneIcon =
                     ContextCompat.getDrawable(this, android.R.drawable.ic_menu_call)
                             .mutate();
-            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
+            entries.add(new ArrayList<>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -367,7 +367,7 @@ public class DetailsActivity extends AppCompatActivity
         }
 
         if (!TextUtils.isEmpty(contact.getFacebook())) {
-            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
+            entries.add(new ArrayList<>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -383,7 +383,7 @@ public class DetailsActivity extends AppCompatActivity
         }
 
         if (!TextUtils.isEmpty(contact.getTwitter())) {
-            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
+            entries.add(new ArrayList<>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -404,7 +404,7 @@ public class DetailsActivity extends AppCompatActivity
 
         if (venue.getStats() != null) {
             VenueCompact.Stats stats = venue.getStats();
-            entries.add(new ArrayList<ExpandingEntryCardView.Entry>());
+            entries.add(new ArrayList<>());
 
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()

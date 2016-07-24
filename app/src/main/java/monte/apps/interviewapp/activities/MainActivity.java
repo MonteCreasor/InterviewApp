@@ -42,7 +42,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements GoogleApiClient.ConnectionCallbacks,
                    GoogleApiClient.OnConnectionFailedListener,
                    LocationListener {
@@ -158,31 +158,28 @@ public class MainActivity extends AppCompatActivity
                         mGoogleApiClient, builder.build());
 
         pendingResult.setResultCallback(
-                new ResultCallback<LocationSettingsResult>() {
-                    @Override
-                    public void onResult(@NonNull LocationSettingsResult result) {
-                        final Status status = result.getStatus();
-                        switch (status.getStatusCode()) {
-                            case LocationSettingsStatusCodes.SUCCESS:
-                                setupLocationTracking();
-                                mFindButton.setEnabled(true);
-                                break;
-                            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                                try {
-                                    status.startResolutionForResult(
-                                            MainActivity.this,
-                                            REQUEST_CHECK_SETTINGS);
-                                } catch (IntentSender.SendIntentException e) {
-                                    // Ignore the error.
-                                }
-                                break;
-                            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                                // Location settings are not satisfied. However,
-                                // we have no way to fix the settings so we
-                                // won't show the dialog.
-                                Log.w(TAG, "onResult: SETTINGS_CHANGE_UNAVAILABLE");
-                                break;
-                        }
+                result -> {
+                    final Status status = result.getStatus();
+                    switch (status.getStatusCode()) {
+                        case LocationSettingsStatusCodes.SUCCESS:
+                            setupLocationTracking();
+                            mFindButton.setEnabled(true);
+                            break;
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            try {
+                                status.startResolutionForResult(
+                                        MainActivity.this,
+                                        REQUEST_CHECK_SETTINGS);
+                            } catch (IntentSender.SendIntentException e) {
+                                // Ignore the error.
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            // Location settings are not satisfied. However,
+                            // we have no way to fix the settings so we
+                            // won't show the dialog.
+                            Log.w(TAG, "onResult: SETTINGS_CHANGE_UNAVAILABLE");
+                            break;
                     }
                 });
     }
@@ -352,12 +349,7 @@ public class MainActivity extends AppCompatActivity
 
         snackbar.setAction(
                 R.string.permissions_ok_button,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        setupLocationService();
-                    }
-                });
+                view -> setupLocationService());
 
         snackbar.show();
     }
@@ -376,15 +368,12 @@ public class MainActivity extends AppCompatActivity
 
         snackbar.setAction(
                 R.string.permissions_ok_button,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+                view -> {
                         /// Submit the request.
                         ActivityCompat.requestPermissions(
                                 MainActivity.this,
                                 new String[]{mLocationPermission},
                                 PERMISSION_REQUEST);
-                    }
                 });
 
         snackbar.show();

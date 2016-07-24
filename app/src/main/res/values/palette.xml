@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    The status bar color is calculated by darkening the primaryAccent
+    color that is based on the activity main image using the
+    following formula:
+
+        statusBarColor = status_bar_color_offset * primaryAccent
+    -->
+    <fraction name="status_bar_color_offset">70%</fraction>
+
+    <!-- Default duration for shared element animations -->
+    <integer name="shared_element_animation_duration">500</integer>
+    <integer name="shared_element_animation_duration_two_pane">500</integer>
+    <integer name="backdrop_fade_duration">500</integer>
+    <integer name="color_morph_duration">500</integer>
+
+    <!-- LeakCanary delay may need to be adjusted depending on the transition animation duration. -->
+    <!--
+    <integer name="leak_canary_watch_delay_millis">1000</integer>
+    -->
+
+    <!-- Sample size used when generating a color palette for a poster bitmap -->
+    <integer name="palette_bitmap_sample_size">80</integer>
+</resources>

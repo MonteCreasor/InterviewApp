@@ -36,7 +36,7 @@ import monte.apps.interviewapp.fragments.VenueFragment;
 import monte.apps.interviewapp.web.dto.VenueCompact;
 import monte.apps.interviewapp.web.dto.VenuesDto;
 
-public class VenuesActivity extends AppCompatActivity
+public class VenuesActivity extends BaseActivity
         implements OnMapReadyCallback,
                    GoogleMap.OnMarkerClickListener,
                    VenueFragment.VenueFragmentListener {
@@ -132,14 +132,7 @@ public class VenuesActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnMapLoadedCallback(
-                new GoogleMap.OnMapLoadedCallback() {
-                    @Override
-                    public void onMapLoaded() {
-                        addMarkers(null);
-                    }
-                }
-        );
+        mMap.setOnMapLoadedCallback(() -> addMarkers(null));
     }
 
    /**
@@ -231,12 +224,7 @@ public class VenuesActivity extends AppCompatActivity
             //        CameraUpdateFactory.newLatLngZoom(selectedLatLng, 12.0f);
             //mMap.animateCamera(cameraUpdate);
 
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    onMarkerClick(marker);
-                }
-            }, 200);
+            new Handler().postDelayed(() -> onMarkerClick(marker), 200);
         } else if (userLatLng != null) {
             //CameraUpdate cameraUpdate =
             //        CameraUpdateFactory.newLatLngZoom(userLatLng, 12.0f);
