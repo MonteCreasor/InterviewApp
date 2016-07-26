@@ -1,7 +1,6 @@
 package monte.apps.interviewapp.web;
 
 import monte.apps.interviewapp.web.dto.PhotosDto;
-import monte.apps.interviewapp.web.dto.VenueComplete;
 import monte.apps.interviewapp.web.dto.VenueDto;
 import monte.apps.interviewapp.web.dto.VenuesDto;
 import retrofit2.Call;

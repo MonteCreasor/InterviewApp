@@ -7,6 +7,7 @@ import java.util.List;
  * Created by monte on 2016-07-18.
  */
 public class VenueCompact implements Serializable {
+    private static final long serialVersionUID = -4671128121629023342L;
     private String id;
     private String name;
     private Location location;

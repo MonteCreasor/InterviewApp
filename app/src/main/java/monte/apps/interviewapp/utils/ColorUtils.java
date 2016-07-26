@@ -270,17 +270,14 @@ public class ColorUtils {
             if (maxDimension > 0) {
                 builder.resizeBitmapArea(maxDimension);
             }
-            mListener = new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(Palette palette) {
-                    // Only make the callback if it hasn't been garbage collected.
-                    GeneratePaletteCallback cb = mCallbackRef.get();
-                    if (cb != null) {
-                        cb.onPaletteGenerated(cb, generateSwatch(palette));
-                    }
-
-                    terminate();
+            mListener = palette -> {
+                // Only make the callback if it hasn't been garbage collected.
+                GeneratePaletteCallback cb = mCallbackRef.get();
+                if (cb != null) {
+                    cb.onPaletteGenerated(cb, generateSwatch(palette));
                 }
+
+                terminate();
             };
             builder.generate(mListener);
         }

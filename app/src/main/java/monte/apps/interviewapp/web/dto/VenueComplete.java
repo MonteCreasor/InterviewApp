@@ -1,7 +1,5 @@
 package monte.apps.interviewapp.web.dto;
 
-import android.view.Menu;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +9,7 @@ import java.util.List;
  */
 
 public class VenueComplete implements Serializable {
+    private static final long serialVersionUID = -8165901645396923383L;
     private String id;
     private String name;
     private Contact contact;
@@ -141,11 +140,13 @@ public class VenueComplete implements Serializable {
     }
 
     public class HereNow implements Serializable {
+        private static final long serialVersionUID = -7738955143567843530L;
         private int count;
         private String summary;
     }
 
     public class Stats implements Serializable {
+        private static final long serialVersionUID = 4940392415991093272L;
         private long checkinsCount;
         private long usersCount;
         private long tipCount;
@@ -169,6 +170,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Location implements Serializable {
+        private static final long serialVersionUID = 6033652655012150142L;
         private String address;
         private double lat;
         private double lng;
@@ -202,6 +204,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Category implements Serializable {
+        private static final long serialVersionUID = 1962744813915409497L;
         private Icon icon;
         private String name;
         private String shortName;
@@ -220,6 +223,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Contact implements Serializable {
+        private static final long serialVersionUID = -8892723721987822240L;
         private String phone;
         private String formattedPhone;
         private String twitter;
@@ -253,6 +257,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Photos implements Serializable {
+        private static final long serialVersionUID = 5880731576440273527L;
         private int count;
         private List<Group<Photo>> groups = new ArrayList<>();
 
@@ -266,6 +271,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Icon implements Serializable {
+        private static final long serialVersionUID = -8233351081593039965L;
         private String prefix;
         private String suffix;
 
@@ -279,6 +285,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Price implements Serializable {
+        private static final long serialVersionUID = 1032344688431325206L;
         private int tier;
         private String message;
         private String currency;
@@ -289,6 +296,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Likes implements Serializable {
+        private static final long serialVersionUID = 1566367643330856851L;
         private int count;
         private String summary;
 
@@ -302,10 +310,11 @@ public class VenueComplete implements Serializable {
     }
 
     public class Hours implements Serializable {
+        private static final long serialVersionUID = -5364521215311641745L;
         private String status;
         private boolean isOpen;
         private boolean isLocalHoliday;
-        private List<Timeframe> timeframes = new ArrayList<Timeframe>();
+        private List<Timeframe> timeframes = new ArrayList<>();
 
         public String getStatus() {
             return status;
@@ -325,6 +334,8 @@ public class VenueComplete implements Serializable {
     }
 
     public class Timeframe implements Serializable {
+        private static final long serialVersionUID = -2244139314566078272L;
+
         public String getDays() {
             return days;
         }
@@ -339,10 +350,12 @@ public class VenueComplete implements Serializable {
 
         private String days;
         private boolean includesToday;
-        private List<Open> open = new ArrayList<Open>();
+        private List<Open> open = new ArrayList<>();
     }
 
     public class Open implements Serializable {
+        private static final long serialVersionUID = 5868951526275370174L;
+
         public String getRenderedTime() {
             return renderedTime;
         }
@@ -351,10 +364,12 @@ public class VenueComplete implements Serializable {
     }
 
     public class VenuePage implements Serializable {
+        private static final long serialVersionUID = 3543857117470885074L;
         private String id;
     }
 
-    public class Menu {
+    public class Menu implements Serializable {
+        private static final long serialVersionUID = 8460508878205397423L;
         private String type;
         private String label;
 
@@ -384,17 +399,20 @@ public class VenueComplete implements Serializable {
     }
 
     public class Reasons implements Serializable {
+        private static final long serialVersionUID = 1881285556172438577L;
         private int count;
         private List<Reason> items = new ArrayList<>();
 
         public class Reason implements Serializable {
+            private static final long serialVersionUID = 9001827949189317932L;
             private String summary;
             private String general;
             private String reasonName;
         }
     }
 
-    public class User {
+    public class User implements Serializable {
+        private static final long serialVersionUID = 8169794388975655013L;
         private String id;
         private String firstName;
         private String lastName;
@@ -419,6 +437,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Group<T> implements Serializable {
+        private static final long serialVersionUID = 4221334956704712058L;
         private String type;
 
         public String getType() {
@@ -440,12 +459,15 @@ public class VenueComplete implements Serializable {
     }
 
     public class Specials implements Serializable {
+        private static final long serialVersionUID = 2091146143722219126L;
     }
 
     public class Page implements Serializable {
+        private static final long serialVersionUID = -91461859029984458L;
     }
 
     public class Tips implements Serializable {
+        private static final long serialVersionUID = -8213524720352475622L;
         private int count;
 
         public List<Group<Tip>> getGroups() {
@@ -460,6 +482,7 @@ public class VenueComplete implements Serializable {
     }
 
     public class Tip implements Serializable {
+        private static final long serialVersionUID = 6802784343334813315L;
         private String id;
         private int createdAt;
         private String text;
@@ -496,25 +519,32 @@ public class VenueComplete implements Serializable {
     }
 
     public class Listed implements Serializable {
+        private static final long serialVersionUID = -5207598998661603751L;
     }
 
     public class Phrase implements Serializable {
+        private static final long serialVersionUID = -2964727966916008329L;
     }
 
     private class Popular implements Serializable {
+        private static final long serialVersionUID = 1040874526780472482L;
     }
 
     private class PageUpdates implements Serializable {
+        private static final long serialVersionUID = -4236923222594663082L;
     }
 
     private class Inbox implements Serializable {
+        private static final long serialVersionUID = 7349850979311670839L;
     }
 
     private class Attributes implements Serializable {
+        private static final long serialVersionUID = -3701353814952440769L;
         private List<Group<Attribute>> groups;
     }
 
     public class Attribute implements Serializable {
+        private static final long serialVersionUID = 1088640567588083890L;
         private String displayName;
         private String displayValue;
     }

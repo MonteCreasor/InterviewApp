@@ -66,28 +66,25 @@ public class ThemeUtils {
         animator.setDuration(colorMorphDuration);
 
         animator.addUpdateListener(
-                new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        final float animatedFraction = animation.getAnimatedFraction();
+                animation -> {
+                    final float animatedFraction = animation.getAnimatedFraction();
 
-                        // Set StatusBar color on Lollipop
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            int statusBarColor = ColorUtils.blendColors(
-                                    startStatusBarColor,
-                                    endStatusBarColor,
-                                    animatedFraction);
-                            ColorUtils.setStatusBarColor(activity.getWindow(), statusBarColor);
-                        }
+                    // Set StatusBar color on Lollipop
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        int statusBarColor = ColorUtils.blendColors(
+                                startStatusBarColor,
+                                endStatusBarColor,
+                                animatedFraction);
+                        ColorUtils.setStatusBarColor(activity.getWindow(), statusBarColor);
+                    }
 
-                        // Set the ActionBar color (only in two-pane mode)
-                        if (activity.isTaskRoot() && actionBarView != null) {
-                            int actionBarColor = ColorUtils.blendColors(
-                                    startActionBarColor,
-                                    endActionBarColor,
-                                    animatedFraction);
-                            actionBarView.setBackgroundColor(actionBarColor);
-                        }
+                    // Set the ActionBar color (only in two-pane mode)
+                    if (activity.isTaskRoot() && actionBarView != null) {
+                        int actionBarColor1 = ColorUtils.blendColors(
+                                startActionBarColor,
+                                endActionBarColor,
+                                animatedFraction);
+                        actionBarView.setBackgroundColor(actionBarColor1);
                     }
                 });
         animator.start();

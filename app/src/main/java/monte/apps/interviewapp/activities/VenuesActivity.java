@@ -12,14 +12,12 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.util.ArrayMap;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -37,8 +35,7 @@ import monte.apps.interviewapp.web.dto.VenueCompact;
 import monte.apps.interviewapp.web.dto.VenuesDto;
 
 public class VenuesActivity extends BaseActivity
-        implements OnMapReadyCallback,
-                   GoogleMap.OnMarkerClickListener,
+        implements GoogleMap.OnMarkerClickListener,
                    VenueFragment.VenueFragmentListener {
 
     /**
@@ -108,7 +105,14 @@ public class VenuesActivity extends BaseActivity
         // ready to be used.
         mMapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map);
-        mMapFragment.getMapAsync(this);
+
+        // Setup map asynchronously and when the map is ready install
+        // a map loaded callback to add the markers.
+        mMapFragment.getMapAsync(
+                googleMap -> {
+                    mMap = googleMap;
+                    mMap.setOnMapLoadedCallback(() -> addMarkers(null));
+                });
 
         Intent intent = getIntent();
         VenuesDto venuesDto =
@@ -121,18 +125,6 @@ public class VenuesActivity extends BaseActivity
 
         mAdapter = new VenueRecyclerViewAdapter(mVenues, this);
         mVenueFragment.setAdapter(mAdapter);
-    }
-
-    /**
-     * Manipulates the map once available. This callback is triggered when the
-     * map is ready to be used. This is where we can add markers or lines, add
-     * listeners or move the camera. If GooglePlay services are not installed,
-     * the user will be prompted to install them.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.setOnMapLoadedCallback(() -> addMarkers(null));
     }
 
    /**
@@ -280,8 +272,7 @@ public class VenuesActivity extends BaseActivity
         // Deselect last selected marker.
         if (mLastSelectedMarker != null) {
             mLastSelectedMarker.setIcon(
-                    BitmapDescriptorFactory.defaultMarker(
-                            MARKER_DEFAULT_COLOR));
+                    BitmapDescriptorFactory.defaultMarker(MARKER_DEFAULT_COLOR));
         }
 
         // Keep track of last selected marker.
@@ -307,7 +298,7 @@ public class VenuesActivity extends BaseActivity
 
         final Interpolator interpolator = new BounceInterpolator();
 
-        final Handler handler = new Handler();
+        Handler handler = new Handler();
         handler.post(new Runnable() {
             @Override
             public void run() {

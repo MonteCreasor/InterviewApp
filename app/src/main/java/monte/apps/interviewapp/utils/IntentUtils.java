@@ -1,20 +1,21 @@
 package monte.apps.interviewapp.utils;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
-import monte.apps.interviewapp.activities.DetailsActivity;
+import android.util.Log;
 
 /**
  * Created by monte on 2016-07-20.
  */
 
 public final class IntentUtils {
+    /** Logging tag. */
+    private static final String TAG = "IntentUtils";
+
     private IntentUtils() {
         throw new AssertionError();
     }
@@ -39,21 +40,24 @@ public final class IntentUtils {
 
     @Nullable
     public static Intent getCallIntent(Context context, String phoneNumber) {
-        Intent intent = new Intent(Intent.ACTION_CALL, Uri.fromParts("tel", phoneNumber, null));
-        return intent.resolveActivity(context.getPackageManager()) != null ? intent: null;
+        return returnIntentOnlyIfResolved(
+                context,
+                new Intent(Intent.ACTION_CALL, Uri.fromParts("tel", phoneNumber, null)));
     }
 
     @Nullable
     public static Intent getDialIntent(Context context, String phoneNumber) {
-        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phoneNumber, null));
-        return intent.resolveActivity(context.getPackageManager()) != null ? intent: null;
+        return returnIntentOnlyIfResolved(
+                context,
+                new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phoneNumber, null)));
     }
 
     @Nullable
     public static Intent getTwitterFollowIntent(Context context, String twitterName) {
         Uri uri = Uri.parse("https://twitter.com/intent/follow?user_id=" + twitterName);
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        return intent.resolveActivity(context.getPackageManager()) != null ? intent: null;
+        return returnIntentOnlyIfResolved(
+                context,
+                new Intent(Intent.ACTION_VIEW, uri));
     }
 
     @Nullable
@@ -61,7 +65,7 @@ public final class IntentUtils {
         Uri uri = Uri.parse("geo:" + lat + "," + lng);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         intent.setPackage("com.google.android.apps.maps");
-        return intent.resolveActivity(context.getPackageManager()) != null ? intent: null;
+        return returnIntentOnlyIfResolved(context, intent);
     }
 
     @Nullable
@@ -69,6 +73,15 @@ public final class IntentUtils {
         Uri uri = Uri.parse("google.navigation:q=" + lat + "," + lng);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         intent.setPackage("com.google.android.apps.maps");
-        return intent.resolveActivity(context.getPackageManager()) != null ? intent: null;
+        return returnIntentOnlyIfResolved(context, intent);
+    }
+
+    private static Intent returnIntentOnlyIfResolved(Context context, Intent intent) {
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            return intent;
+        }
+
+        Log.w(TAG, "Unable to resolve " + intent.getAction() + " intent");
+        return null;
     }
 }

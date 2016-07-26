@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -17,7 +16,6 @@ import java.util.List;
 
 import monte.apps.interviewapp.R;
 import monte.apps.interviewapp.fragments.VenueFragment;
-import monte.apps.interviewapp.utils.Preconditions;
 import monte.apps.interviewapp.web.FourSquareClient;
 import monte.apps.interviewapp.web.dto.VenueCompact;
 
@@ -110,25 +108,19 @@ public class VenueRecyclerViewAdapter
 
         holder.mNameTextView.setText(venue.getName());
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    mListener.onVenueClicked(venue);
-                }
+        holder.mView.setOnClickListener(v -> {
+            if (null != mListener) {
+                mListener.onVenueClicked(venue);
             }
         });
 
-        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                if (null != mListener) {
-                    mListener.onVenueLongClicked(venue);
-                    return true;
-                }
-
-                return false;
+        holder.mView.setOnLongClickListener(view -> {
+            if (null != mListener) {
+                mListener.onVenueLongClicked(venue);
+                return true;
             }
+
+            return false;
         });
     }
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="distance_in_meters">%s Metres</string>
+    <string name="distance_in_kilometers">%s Km</string>
+    <string name="distance_in_feet">%s Feet</string>
+    <string name="distance_in_miles">%s Miles</string>
+</resources>

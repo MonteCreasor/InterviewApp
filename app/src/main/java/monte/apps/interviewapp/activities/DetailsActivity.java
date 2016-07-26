@@ -1,32 +1,46 @@
 package monte.apps.interviewapp.activities;
 
+import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import monte.apps.interviewapp.R;
+import monte.apps.interviewapp.permissions.RequestPermissionsActivity;
+import monte.apps.interviewapp.utils.ActivityUtils;
 import monte.apps.interviewapp.utils.CircleTransform;
+import monte.apps.interviewapp.utils.ImplicitIntentsUtil;
 import monte.apps.interviewapp.utils.IntentUtils;
+import monte.apps.interviewapp.utils.LocaleUtils;
 import monte.apps.interviewapp.views.ExpandingEntryCardView;
+import monte.apps.interviewapp.views.ExpandingEntryCardView.EntryTag;
+import monte.apps.interviewapp.views.TouchPointManager;
 import monte.apps.interviewapp.web.FourSquareClient;
 import monte.apps.interviewapp.web.dto.Photo;
 import monte.apps.interviewapp.web.dto.VenueCompact;
@@ -36,14 +50,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static monte.apps.interviewapp.utils.PhoneCapabilityTester.SCHEME_SMSTO;
+
 public class DetailsActivity extends BaseActivity
         implements ExpandingEntryCardView.ExpandingEntryCardViewListener {
-
-    /**
-     * Logging tag.
-     */
+    /** Logging tag. */
     private static final String TAG = "DetailsActivity";
 
+    public static final String MIMETYPE_SMS = "vnd.android-dir/mms-sms";
     private static final String EXTRA_VENUE = "extra_venue";
     private static final int MAX_COMMENTS = 10;
 
@@ -62,12 +76,29 @@ public class DetailsActivity extends BaseActivity
     ExpandingEntryCardView mStatsCard;
     @BindView(R.id.comments_card)
     ExpandingEntryCardView mCommentsCard;
-
     @BindView(R.id.scroll_view)
     NestedScrollView mNestedScrollView;
 
+    private final View.OnClickListener mEntryClickHandler = v -> {
+        final Object entryTagObject = v.getTag();
+        if (entryTagObject == null
+                || !(entryTagObject instanceof ExpandingEntryCardView.EntryTag)) {
+            Log.w(TAG, "EntryTag was not used correctly");
+            return;
+        }
+        final EntryTag entryTag = (EntryTag) entryTagObject;
+        final Intent intent = entryTag.getIntent();
+
+        // All action activities are started as a new task.
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // Launch the activity.
+        ActivityUtils.startActivityWithErrorToast(this, intent);
+    };
+
     private VenueCompact mVenue;
     private VenueComplete mVenueComplete;
+    private CompletableFuture<Void> mDetailsFuture;
 
     public static Intent makeIntent(Context context, @NonNull VenueCompact venue) {
         final Intent intent = new Intent(context, DetailsActivity.class);
@@ -80,6 +111,10 @@ public class DetailsActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        if (RequestPermissionsActivity.startPermissionActivity(this)) {
+            return;
+        }
+
         ButterKnife.bind(this, findViewById(android.R.id.content));
 
         mVenue = (VenueCompact) getIntent().getSerializableExtra(EXTRA_VENUE);
@@ -91,14 +126,36 @@ public class DetailsActivity extends BaseActivity
 
         initializeViews();
 
-        startLoader();
+        mDetailsFuture =
+                CompletableFuture.supplyAsync(() -> loadFullDetails(mVenue.getId()))
+                        .exceptionally(throwable -> null)
+                        .thenAccept(
+                                response -> runOnUiThread(
+                                        () -> loadCompleteVenue(response)));
     }
 
-    private void startLoader() {
+    private VenueComplete loadFullDetails(String id) {
+        try {
+            return FourSquareClient.buildRestAdapter()
+                    .getVenue(mVenue.getId()).execute().body().getVenue();
+        } catch (IOException e) {
+            Log.d(TAG, "loadFullDetails: IOException!");
+            return null;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!mDetailsFuture.isDone()) {
+            mDetailsFuture.cancel(true);
+        }
+    }
+
+    private void loadFullDetailsAsync() {
         Call<VenueDto> venueDto =
                 FourSquareClient.buildRestAdapter()
                         .getVenue(mVenue.getId());
-
         venueDto.enqueue(new Callback<VenueDto>() {
             @Override
             public void onResponse(
@@ -125,6 +182,7 @@ public class DetailsActivity extends BaseActivity
         List<List<ExpandingEntryCardView.Entry>> entries;
 
         entries = locationToEntries(mVenue);
+        mLocationCard.setOnClickListener(mEntryClickHandler);
         if (!entries.isEmpty()) {
             mLocationCard.setTitle("Location");
             mLocationCard.setVisibility(View.VISIBLE);
@@ -138,6 +196,7 @@ public class DetailsActivity extends BaseActivity
         }
 
         entries = contactToEntries(mVenue.getContact());
+        mContactCard.setOnClickListener(mEntryClickHandler);
         if (!entries.isEmpty()) {
             mContactCard.setTitle("Contact");
             mContactCard.setVisibility(View.VISIBLE);
@@ -151,13 +210,20 @@ public class DetailsActivity extends BaseActivity
         }
     }
 
-    private void loadCompleteVenue(VenueComplete venueComplete) {
-        mVenueComplete = venueComplete;
-        Photo photo = venueComplete.getBestPhoto();
+    private void loadCompleteVenue(VenueComplete venue) {
+        if (venue == null) {
+            Snackbar.make(findViewById(android.R.id.content),
+                          "Unable to access venue details",
+                          Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+
+        mVenueComplete = venue;
+        Photo photo = venue.getBestPhoto();
         if (photo != null) {
             loadPhoto(photo);
         } else {
-            VenueComplete.Photos photos = venueComplete.getPhotos();
+            VenueComplete.Photos photos = venue.getPhotos();
             if (photos != null && photos.getCount() > 0) {
                 if (!photos.getGroups().isEmpty()) {
                     VenueComplete.Group<Photo> photoGroup = photos.getGroups().get(0);
@@ -170,7 +236,8 @@ public class DetailsActivity extends BaseActivity
 
         List<List<ExpandingEntryCardView.Entry>> entries;
 
-        entries = tipsToEntries(venueComplete.getTips());
+        entries = tipsToEntries(venue.getTips());
+        mCommentsCard.setOnClickListener(mEntryClickHandler);
         if (!entries.isEmpty()) {
             mCommentsCard.setTitle("Comments");
             mCommentsCard.setVisibility(View.VISIBLE);
@@ -212,7 +279,7 @@ public class DetailsActivity extends BaseActivity
                 continue;
             }
 
-            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
+            entries.add(new ArrayList<>(1));
 
             ExpandingEntryCardView.Builder builder = new ExpandingEntryCardView.Builder();
             builder.id(-1);
@@ -229,11 +296,9 @@ public class DetailsActivity extends BaseActivity
                 }
                 header += user.getFirstName();
             }
-
             if (header.isEmpty()) {
                 header = "User: " + user.getId();
             }
-
             if (!TextUtils.isEmpty(header)) {
                 builder.header(header);
             }
@@ -318,8 +383,8 @@ public class DetailsActivity extends BaseActivity
                                 .id(-1)
                                 .header("Distance")
                                 .icon(ContextCompat.getDrawable(this, R.drawable.default_icon))
-                                .text(String.format("%.1f Km",
-                                                    (float) ((int) location.getDistance()) / 1000.0))
+                                .text(LocaleUtils.getPrintableDistanceFromMeters(
+                                        this, location.getDistance(), 1))
                                 .build()
                 );
             }
@@ -338,6 +403,7 @@ public class DetailsActivity extends BaseActivity
             }
 
         }
+
         return entries;
     }
 
@@ -429,6 +495,14 @@ public class DetailsActivity extends BaseActivity
         }
 
         return entries;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            TouchPointManager.getInstance().setPoint((int) ev.getRawX(), (int) ev.getRawY());
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     /**

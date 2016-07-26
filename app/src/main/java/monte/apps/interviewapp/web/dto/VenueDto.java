@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 
 public class VenueDto implements Serializable {
+    private static final long serialVersionUID = -7067281855140170476L;
     private Meta meta;
     private Response response;
 
@@ -23,6 +24,7 @@ public class VenueDto implements Serializable {
     }
 
     public class Response implements Serializable {
+        private static final long serialVersionUID = 8413177535824692217L;
         private VenueComplete venue;
 
         public VenueComplete getVenue() {

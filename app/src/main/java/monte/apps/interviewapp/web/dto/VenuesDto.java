@@ -8,6 +8,7 @@ import java.util.List;
  */
 
 public class VenuesDto implements Serializable {
+    private static final long serialVersionUID = -9001087918228589033L;
     private Meta meta;
     private Response response;
 
@@ -24,6 +25,7 @@ public class VenuesDto implements Serializable {
     }
 
     public class Response implements Serializable {
+        private static final long serialVersionUID = -885753634566237193L;
         private List<VenueCompact> venues;
         public List<VenueCompact> getVenues() {
             return venues;

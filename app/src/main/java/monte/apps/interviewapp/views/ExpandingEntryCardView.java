@@ -118,14 +118,11 @@ public class ExpandingEntryCardView extends CardView {
     private List<View> mSeparators;
     private LinearLayout mContainer;
     private final OnClickListener mExpandCollapseButtonListener =
-            new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mIsExpanded) {
-                        collapse();
-                    } else {
-                        expand();
-                    }
+            v -> {
+                if (mIsExpanded) {
+                    collapse();
+                } else {
+                    expand();
                 }
             };
 
@@ -158,8 +155,8 @@ public class ExpandingEntryCardView extends CardView {
         mDividerLineHeightPixels = getResources()
                 .getDimensionPixelSize(R.dimen.divider_line_height);
 
-        mBadges = new ArrayList<ImageView>();
-        mBadgeIds = new ArrayList<Integer>();
+        mBadges = new ArrayList<>();
+        mBadgeIds = new ArrayList<>();
     }
 
     public static Builder newBuilder() {
@@ -197,14 +194,14 @@ public class ExpandingEntryCardView extends CardView {
         mIsAlwaysExpanded = isAlwaysExpanded;
         // If isAlwaysExpanded is true, mIsExpanded should be true
         mIsExpanded |= mIsAlwaysExpanded;
-        mEntryViews = new ArrayList<List<View>>(entries.size());
+        mEntryViews = new ArrayList<>(entries.size());
         mEntries = entries;
         mNumEntries = 0;
         mAllEntriesInflated = false;
         mShowFirstEntryTypeTwice = showFirstEntryTypeTwice;
         for (List<Entry> entryList : mEntries) {
             mNumEntries += entryList.size();
-            mEntryViews.add(new ArrayList<View>());
+            mEntryViews.add(new ArrayList<>());
         }
         mCollapsedEntriesCount =
                 Math.min(numInitialVisibleEntries, mNumEntries);
@@ -267,7 +264,7 @@ public class ExpandingEntryCardView extends CardView {
      * card is expanded or collapsed.
      */
     private List<View> getViewsToDisplay(boolean isExpanded) {
-        final List<View> viewsToDisplay = new ArrayList<View>();
+        final List<View> viewsToDisplay = new ArrayList<>();
         if (isExpanded) {
             for (int i = 0; i < mEntryViews.size(); i++) {
                 List<View> viewList = mEntryViews.get(i);
@@ -281,9 +278,7 @@ public class ExpandingEntryCardView extends CardView {
                     }
                     viewsToDisplay.add(separator);
                 }
-                for (View view : viewList) {
-                    viewsToDisplay.add(view);
-                }
+                viewsToDisplay.addAll(viewList);
             }
         } else {
             // We want to insert mCollapsedEntriesCount entries into the
@@ -698,21 +693,7 @@ public class ExpandingEntryCardView extends CardView {
                 thirdIcon.setTag(
                         new EntryTag(entry.getId(), entry.getThirdIntent()));
             } else if (entry.getThirdAction() == Entry.ACTION_CALL_WITH_SUBJECT) {
-                thirdIcon.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Object tag = v.getTag();
-                        if (!(tag instanceof Bundle)) {
-                            return;
-                        }
-
-                        Context context = getContext();
-                        if (context instanceof Activity) {
-                            Toast.makeText(context, "TODO", Toast.LENGTH_SHORT).show();
-                            // CallSubjectDialog.start((Activity) context, entry.getThirdExtras());
-                        }
-                    }
-                });
+                thirdIcon.setOnClickListener(mOnClickListener);
                 thirdIcon.setTag(entry.getThirdExtras());
             }
             thirdIcon.setVisibility(View.VISIBLE);
@@ -862,7 +843,7 @@ public class ExpandingEntryCardView extends CardView {
         // performance hit doesn't justify writing a less maintainable
         // animation.
         final AnimatorSet set = new AnimatorSet();
-        final List<Animator> animators = new ArrayList<Animator>(views.size());
+        final List<Animator> animators = new ArrayList<>(views.size());
         int totalSizeChange = 0;
         for (View viewToRemove : views) {
             final ObjectAnimator animator =
@@ -1243,7 +1224,7 @@ public class ExpandingEntryCardView extends CardView {
         }
     }
 
-    static final class EntryTag {
+    public static final class EntryTag {
         private final int mId;
         private final Intent mIntent;
 

@@ -40,6 +40,14 @@
     <!-- Extra top padding if the title is set to null -->
     <dimen name="expanding_entry_card_null_title_top_extra_padding">2dp</dimen>
 
+    <!-- Shown as a toast when the user attempts an action and no application was
+         found that could perform that action. [CHAR LIMIT=NONE] -->
+    <string name="start_activity_missing_app">No app was found to handle this action.</string>
+
+    <!-- Shown as a toast when the user attempts an action with insufficient
+         permission grants. [CHAR LIMIT=NONE] -->
+    <string name="start_activity_no_permission">App does not have the required permissions to perform this action</string>
+
     <!-- Height of the separator between entries in an ExpandingEntryCardView and contact editor. -->
     <dimen name="divider_line_height">1dp</dimen>
 

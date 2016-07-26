@@ -6,6 +6,7 @@ import java.io.Serializable;
  * Created by monte on 2016-07-18.
  */
 public class Meta implements Serializable {
+    private static final long serialVersionUID = -5315456656545040537L;
     private int code;
     private String requestId;
 

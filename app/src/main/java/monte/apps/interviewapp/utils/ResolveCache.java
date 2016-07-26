@@ -56,7 +56,7 @@ public class ResolveCache {
             flush();
         }
     };
-    private HashMap<String, Entry> mCache = new HashMap<String, Entry>();
+    private HashMap<String, Entry> mCache = new HashMap<>();
 
     private ResolveCache(Context context) {
         mContext = context;

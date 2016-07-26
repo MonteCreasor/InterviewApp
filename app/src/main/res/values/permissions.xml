@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The user doesn't have all permissions required to use the current screen. So
+         close the current screen and show the user this message. -->
+    <string name="missing_required_permission">You have disabled a required permission.</string>
+    <string name="title_activity_request_permissions">Permissions</string>
+</resources>

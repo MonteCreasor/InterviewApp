@@ -8,6 +8,7 @@ import java.io.Serializable;
  * Created by monte on 2016-07-18.
  */
 public class Photo implements Serializable {
+    private static final long serialVersionUID = -5095449683709540676L;
     private String id;
     private Source source;
     private String prefix;
