@@ -23,6 +23,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Trace;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -39,9 +41,11 @@ import monte.apps.interviewapp.R;
  * application restart.
  */
 public abstract class RequestPermissionsActivityBase extends Activity {
-    /** Logging tag. */
-    private static final String TAG = "PermissionsActivityBase";
     public static final String ACTIVITY_INTENT = "previous_intent";
+    /**
+     * Logging tag.
+     */
+    private static final String TAG = "PermissionsActivityBase";
     private static final int PERMISSIONS_REQUEST_ALL_PERMISSIONS = 1;
     private Intent mActivityIntent;
 
@@ -83,33 +87,24 @@ public abstract class RequestPermissionsActivityBase extends Activity {
     }
 
     protected static boolean requiresRationale(Activity activity, String[] permissions) {
-        Trace.beginSection("requiresRational");
-        try {
             for (String permission : permissions) {
-                if (activity.shouldShowRequestPermissionRationale(permission)) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
                     Log.d(TAG, "requiresRationale: " + permission + " = true");
                 } else {
                     Log.d(TAG, "requiresRationale: " + permission + " = false");
                 }
             }
             return true;
-        } finally {
-            Trace.endSection();
-        }
     }
+
     protected static boolean hasPermissions(Context context, String[] permissions) {
-        Trace.beginSection("hasPermission");
-        try {
             for (String permission : permissions) {
-                if (context.checkSelfPermission(permission)
+                if (ContextCompat.checkSelfPermission(context, permission)
                         != PackageManager.PERMISSION_GRANTED) {
                     return false;
                 }
             }
             return true;
-        } finally {
-            Trace.endSection();
-        }
     }
 
     /**
@@ -146,7 +141,7 @@ public abstract class RequestPermissionsActivityBase extends Activity {
             finish();
             overridePendingTransition(0, 0);
         } else {
-            if (!shouldShowRequestPermissionRationale(permissions[0])) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
                 PermissionsUtil.notifyPermissionGranted(this, permissions[0]);
             }
             Toast.makeText(this, R.string.missing_required_permission, Toast.LENGTH_SHORT).show();
@@ -169,27 +164,23 @@ public abstract class RequestPermissionsActivityBase extends Activity {
     }
 
     private void requestPermissions() {
-        Trace.beginSection("requestPermissions");
-        try {
-            // Construct a list of missing permissions
-            final ArrayList<String> unsatisfiedPermissions = new ArrayList<>();
-            for (String permission : getDesiredPermissions()) {
-                int result = checkSelfPermission(permission);
+        // Construct a list of missing permissions
+        final ArrayList<String> unsatisfiedPermissions = new ArrayList<>();
+        for (String permission : getDesiredPermissions()) {
+            int result = ActivityCompat.checkSelfPermission(this, permission);
 
-                if (checkSelfPermission(permission)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    unsatisfiedPermissions.add(permission);
-                }
+            if (ActivityCompat.checkSelfPermission(this, permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                unsatisfiedPermissions.add(permission);
             }
-            if (unsatisfiedPermissions.size() == 0) {
-                throw new RuntimeException("Request permission activity was called even"
-                                                   + " though all permissions are satisfied.");
-            }
-            requestPermissions(
-                    unsatisfiedPermissions.toArray(new String[unsatisfiedPermissions.size()]),
-                    PERMISSIONS_REQUEST_ALL_PERMISSIONS);
-        } finally {
-            Trace.endSection();
         }
+        if (unsatisfiedPermissions.size() == 0) {
+            throw new RuntimeException("Request permission activity was called even"
+                                               + " though all permissions are satisfied.");
+        }
+        ActivityCompat.requestPermissions(this,
+                                          unsatisfiedPermissions.toArray(
+                                                  new String[unsatisfiedPermissions.size()]),
+                                          PERMISSIONS_REQUEST_ALL_PERMISSIONS);
     }
 }
