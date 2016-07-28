@@ -18,6 +18,7 @@ package monte.apps.interviewapp.permissions;
 
 import android.Manifest.permission;
 import android.app.Activity;
+import android.content.Intent;
 
 /**
  * Activity that requests permissions needed for activities exported from Contacts.
@@ -35,6 +36,18 @@ public class RequestPermissionsActivity extends RequestPermissionsActivityBase {
             //permission.READ_CALL_LOG,
     };
 
+    public static boolean requestPermissionAndStartAction(
+            Activity activity,
+            Intent intent) {
+        return requestPermissionAndStartAction(
+                activity, intent, REQUIRED_PERMISSIONS, RequestPermissionsActivity.class);
+    }
+
+    public static boolean startPermissionActivity(Activity activity) {
+        return startPermissionActivity(
+                activity, REQUIRED_PERMISSIONS, RequestPermissionsActivity.class);
+    }
+
     @Override
     protected String[] getRequiredPermissions() {
         return REQUIRED_PERMISSIONS;
@@ -51,9 +64,5 @@ public class RequestPermissionsActivity extends RequestPermissionsActivityBase {
                 //permission.READ_CALENDAR, // Calendar group
                 //permission.READ_SMS, // SMS group
         };
-    }
-    public static boolean startPermissionActivity(Activity activity) {
-        return startPermissionActivity(activity, REQUIRED_PERMISSIONS,
-                RequestPermissionsActivity.class);
     }
 }

@@ -1,26 +1,23 @@
 package monte.apps.interviewapp.activities;
 
-import android.content.ActivityNotFoundException;
-import android.content.ContentValues;
+import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.Toolbar;
-import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -32,10 +29,10 @@ import java.util.concurrent.CompletableFuture;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import monte.apps.interviewapp.R;
+import monte.apps.interviewapp.permissions.PermissionsUtil;
 import monte.apps.interviewapp.permissions.RequestPermissionsActivity;
 import monte.apps.interviewapp.utils.ActivityUtils;
 import monte.apps.interviewapp.utils.CircleTransform;
-import monte.apps.interviewapp.utils.ImplicitIntentsUtil;
 import monte.apps.interviewapp.utils.IntentUtils;
 import monte.apps.interviewapp.utils.LocaleUtils;
 import monte.apps.interviewapp.views.ExpandingEntryCardView;
@@ -50,35 +47,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static monte.apps.interviewapp.utils.PhoneCapabilityTester.SCHEME_SMSTO;
-
 public class DetailsActivity extends BaseActivity
         implements ExpandingEntryCardView.ExpandingEntryCardViewListener {
-    /** Logging tag. */
-    private static final String TAG = "DetailsActivity";
-
     public static final String MIMETYPE_SMS = "vnd.android-dir/mms-sms";
+    /**
+     * Logging tag.
+     */
+    private static final String TAG = "DetailsActivity";
     private static final String EXTRA_VENUE = "extra_venue";
     private static final int MAX_COMMENTS = 10;
-
-    @BindView(R.id.photo_image_view)
-    ImageView mImageView;
-    @BindView(R.id.toolbar_layout)
-    CollapsingToolbarLayout mCollapsingToolbarLayout;
-
-    @BindView(R.id.no_data_card)
-    ExpandingEntryCardView mNoDataCard;
-    @BindView(R.id.location_card)
-    ExpandingEntryCardView mLocationCard;
-    @BindView(R.id.contact_card)
-    ExpandingEntryCardView mContactCard;
-    @BindView(R.id.stats_card)
-    ExpandingEntryCardView mStatsCard;
-    @BindView(R.id.comments_card)
-    ExpandingEntryCardView mCommentsCard;
-    @BindView(R.id.scroll_view)
-    NestedScrollView mNestedScrollView;
-
     private final View.OnClickListener mEntryClickHandler = v -> {
         final Object entryTagObject = v.getTag();
         if (entryTagObject == null
@@ -92,10 +69,31 @@ public class DetailsActivity extends BaseActivity
         // All action activities are started as a new task.
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+        if (Intent.ACTION_CALL.equals(intent.getAction())) {
+            if (RequestPermissionsActivity.requestPermissionAndStartAction(this, intent)) {
+                return;
+            }
+        }
+
         // Launch the activity.
         ActivityUtils.startActivityWithErrorToast(this, intent);
     };
-
+    @BindView(R.id.photo_image_view)
+    ImageView mImageView;
+    @BindView(R.id.toolbar_layout)
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+    @BindView(R.id.no_data_card)
+    ExpandingEntryCardView mNoDataCard;
+    @BindView(R.id.location_card)
+    ExpandingEntryCardView mLocationCard;
+    @BindView(R.id.contact_card)
+    ExpandingEntryCardView mContactCard;
+    @BindView(R.id.stats_card)
+    ExpandingEntryCardView mStatsCard;
+    @BindView(R.id.comments_card)
+    ExpandingEntryCardView mCommentsCard;
+    @BindView(R.id.scroll_view)
+    NestedScrollView mNestedScrollView;
     private VenueCompact mVenue;
     private VenueComplete mVenueComplete;
     private CompletableFuture<Void> mDetailsFuture;
@@ -110,10 +108,6 @@ public class DetailsActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-
-        if (RequestPermissionsActivity.startPermissionActivity(this)) {
-            return;
-        }
 
         ButterKnife.bind(this, findViewById(android.R.id.content));
 
@@ -132,6 +126,19 @@ public class DetailsActivity extends BaseActivity
                         .thenAccept(
                                 response -> runOnUiThread(
                                         () -> loadCompleteVenue(response)));
+
+        PermissionsUtil.registerPermissionReceiver(this, new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
+                                                  "TODO: Just a test .... ",
+                                                  Snackbar.LENGTH_LONG);
+                snackbar.setAction("Settings", view -> startActivity(
+                        IntentUtils.getAppSettingsIntent(DetailsActivity.this)));
+                snackbar.show();
+            }
+
+        }, Manifest.permission.CALL_PHONE);
     }
 
     private VenueComplete loadFullDetails(String id) {

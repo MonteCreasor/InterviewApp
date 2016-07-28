@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Trace;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -30,34 +32,102 @@ import java.util.Arrays;
 import monte.apps.interviewapp.R;
 
 /**
- * Activity that asks the user for all {@link #getDesiredPermissions} if any of
- * {@link #getRequiredPermissions} are missing.
- *
- * NOTE: This can behave oddly in the case where the final permission
- * you are requesting causes an application restart.
+ * Activity that asks the user for all {@link #getDesiredPermissions} if any of {@link
+ * #getRequiredPermissions} are missing.
+ * <p>
+ * NOTE: This can behave oddly in the case where the final permission you are requesting causes an
+ * application restart.
  */
 public abstract class RequestPermissionsActivityBase extends Activity {
-    public static final String PREVIOUS_ACTIVITY_INTENT = "previous_intent";
+    /** Logging tag. */
+    private static final String TAG = "PermissionsActivityBase";
+    public static final String ACTIVITY_INTENT = "previous_intent";
     private static final int PERMISSIONS_REQUEST_ALL_PERMISSIONS = 1;
+    private Intent mActivityIntent;
 
     /**
-     * @return list of permissions that are needed in order for {@link #PREVIOUS_ACTIVITY_INTENT} to
-     * operate. You only need to return a single permission per permission group you care about.
+     * If any permissions the app needs are missing, open an Activity to prompt the user for these
+     * permissions. Moreover, if required finish the current activity.
+     * <p>
+     * This is designed to be called inside {@link android.app.Activity#onCreate}
+     */
+    protected static boolean startPermissionActivity(
+            Activity activity,
+            String[] requiredPermissions,
+            Class<?> subClass) {
+        if (!RequestPermissionsActivity.hasPermissions(activity, requiredPermissions)) {
+            final Intent intent = new Intent(activity, subClass);
+            intent.putExtra(ACTIVITY_INTENT, activity.getIntent());
+            activity.startActivity(intent);
+            activity.finish();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean requestPermissionAndStartAction(
+            Activity activity,
+            Intent actionIntent,
+            String[] requiredPermissions,
+            Class<?> subClass) {
+        if (!RequestPermissionsActivity.hasPermissions(activity, requiredPermissions)) {
+            Intent subClassIntent = new Intent(activity, subClass);
+            subClassIntent.putExtra(ACTIVITY_INTENT, actionIntent);
+            activity.startActivity(subClassIntent);
+            requiresRationale(activity, requiredPermissions);
+            return true;
+        }
+
+        return false;
+    }
+
+    protected static boolean requiresRationale(Activity activity, String[] permissions) {
+        Trace.beginSection("requiresRational");
+        try {
+            for (String permission : permissions) {
+                if (activity.shouldShowRequestPermissionRationale(permission)) {
+                    Log.d(TAG, "requiresRationale: " + permission + " = true");
+                } else {
+                    Log.d(TAG, "requiresRationale: " + permission + " = false");
+                }
+            }
+            return true;
+        } finally {
+            Trace.endSection();
+        }
+    }
+    protected static boolean hasPermissions(Context context, String[] permissions) {
+        Trace.beginSection("hasPermission");
+        try {
+            for (String permission : permissions) {
+                if (context.checkSelfPermission(permission)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+            return true;
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    /**
+     * @return list of permissions that are needed in order for {@link #ACTIVITY_INTENT} to operate.
+     * You only need to return a single permission per permission group you care about.
      */
     protected abstract String[] getRequiredPermissions();
 
     /**
-     * @return list of permissions that would be useful for {@link #PREVIOUS_ACTIVITY_INTENT} to
-     * operate. You only need to return a single permission per permission group you care about.
+     * @return list of permissions that would be useful for {@link #ACTIVITY_INTENT} to operate. You
+     * only need to return a single permission per permission group you care about.
      */
     protected abstract String[] getDesiredPermissions();
-
-    private Intent mPreviousActivityIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPreviousActivityIntent = (Intent) getIntent().getExtras().get(PREVIOUS_ACTIVITY_INTENT);
+        mActivityIntent = (Intent) getIntent().getExtras().get(ACTIVITY_INTENT);
 
         // Only start a requestPermissions() flow when first starting this activity the first time.
         // The process is likely to be restarted during the permission flow (necessary to enable
@@ -67,35 +137,18 @@ public abstract class RequestPermissionsActivityBase extends Activity {
         }
     }
 
-    /**
-     * If any permissions the app needs are missing, open an Activity
-     * to prompt the user for these permissions. Moreover, finish the current activity.
-     *
-     * This is designed to be called inside {@link android.app.Activity#onCreate}
-     */
-    protected static boolean startPermissionActivity(
-            Activity activity, String[] requiredPermissions, Class<?> newActivityClass) {
-        if (!RequestPermissionsActivity.hasPermissions(activity, requiredPermissions)) {
-            final Intent intent = new Intent(activity, newActivityClass);
-            intent.putExtra(PREVIOUS_ACTIVITY_INTENT, activity.getIntent());
-            activity.startActivity(intent);
-            activity.finish();
-            return true;
-        }
-
-        return false;
-    }
-
     @Override
     public void onRequestPermissionsResult(
-            int requestCode, String permissions[], int[] grantResults) {
-        if (permissions != null && permissions.length > 0
-                && isAllGranted(permissions, grantResults)) {
-            mPreviousActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(mPreviousActivityIntent);
+            int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        if (permissions.length > 0 && isAllGranted(permissions, grantResults)) {
+            mActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(mActivityIntent);
             finish();
             overridePendingTransition(0, 0);
         } else {
+            if (!shouldShowRequestPermissionRationale(permissions[0])) {
+                PermissionsUtil.notifyPermissionGranted(this, permissions[0]);
+            }
             Toast.makeText(this, R.string.missing_required_permission, Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -121,6 +174,8 @@ public abstract class RequestPermissionsActivityBase extends Activity {
             // Construct a list of missing permissions
             final ArrayList<String> unsatisfiedPermissions = new ArrayList<>();
             for (String permission : getDesiredPermissions()) {
+                int result = checkSelfPermission(permission);
+
                 if (checkSelfPermission(permission)
                         != PackageManager.PERMISSION_GRANTED) {
                     unsatisfiedPermissions.add(permission);
@@ -128,26 +183,11 @@ public abstract class RequestPermissionsActivityBase extends Activity {
             }
             if (unsatisfiedPermissions.size() == 0) {
                 throw new RuntimeException("Request permission activity was called even"
-                        + " though all permissions are satisfied.");
+                                                   + " though all permissions are satisfied.");
             }
             requestPermissions(
                     unsatisfiedPermissions.toArray(new String[unsatisfiedPermissions.size()]),
                     PERMISSIONS_REQUEST_ALL_PERMISSIONS);
-        } finally {
-            Trace.endSection();
-        }
-    }
-
-    protected static boolean hasPermissions(Context context, String[] permissions) {
-        Trace.beginSection("hasPermission");
-        try {
-            for (String permission : permissions) {
-                if (context.checkSelfPermission(permission)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-            return true;
         } finally {
             Trace.endSection();
         }

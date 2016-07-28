@@ -3,6 +3,7 @@ package monte.apps.interviewapp.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -73,6 +74,15 @@ public final class IntentUtils {
         Uri uri = Uri.parse("google.navigation:q=" + lat + "," + lng);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         intent.setPackage("com.google.android.apps.maps");
+        return returnIntentOnlyIfResolved(context, intent);
+    }
+
+    @Nullable
+    public static Intent getAppSettingsIntent(Context context) {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+        intent.setData(uri);
         return returnIntentOnlyIfResolved(context, intent);
     }
 

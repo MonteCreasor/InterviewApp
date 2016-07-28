@@ -37,12 +37,22 @@ public class PermissionsUtil {
      * Note: This assumes that the app has correctly requested for all the relevant permissions
      * in its Manifest file.
      */
-    public static final String PHONE = permission.CALL_PHONE;
+    public static final String CALENDAR = permission.WRITE_CALENDAR;
+    public static final String CAMERA = permission.CAMERA;
     public static final String CONTACTS = permission.READ_CONTACTS;
     public static final String LOCATION = permission.ACCESS_FINE_LOCATION;
+    public static final String MICROPHONE = permission.RECORD_AUDIO;
+    public static final String PHONE = permission.CALL_PHONE;
+    public static final String SENSORS = permission.BODY_SENSORS;
+    public static final String SMS = permission.SEND_SMS;
+    public static final String STORAGE = permission.WRITE_EXTERNAL_STORAGE;
 
-    public static boolean hasPhonePermissions(Context context) {
-        return hasPermission(context, PHONE);
+    public static boolean hasCalendarPermissions(Context context) {
+        return hasPermission(context, CALENDAR);
+    }
+
+    public static boolean hasCameraPermssions(Context context) {
+        return hasPermission(context, CAMERA);
     }
 
     public static boolean hasContactsPermissions(Context context) {
@@ -51,6 +61,26 @@ public class PermissionsUtil {
 
     public static boolean hasLocationPermissions(Context context) {
         return hasPermission(context, LOCATION);
+    }
+
+    public static boolean hasMicrophonePermissions(Context context) {
+        return hasPermission(context, MICROPHONE);
+    }
+
+    public static boolean hasPhonePermissions(Context context) {
+        return hasPermission(context, PHONE);
+    }
+
+    public static boolean hasSensorsPermissions(Context context) {
+        return hasPermission(context, SENSORS);
+    }
+
+    public static boolean hasSmsPermission(Context context) {
+        return hasPermission(context, SMS);
+    }
+
+    public static boolean hasStoragePermissions(Context context) {
+        return hasPermission(context, STORAGE);
     }
 
     public static boolean hasPermission(Context context, String permission) {
