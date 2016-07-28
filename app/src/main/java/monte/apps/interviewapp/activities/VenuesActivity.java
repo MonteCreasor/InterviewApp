@@ -18,6 +18,7 @@ import android.view.animation.Interpolator;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -109,32 +110,41 @@ public class VenuesActivity extends BaseActivity
         // Setup map asynchronously and when the map is ready install
         // a map loaded callback to add the markers.
         mMapFragment.getMapAsync(
-                googleMap -> {
-                    mMap = googleMap;
-                    mMap.setOnMapLoadedCallback(() -> addMarkers(null));
+                new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap googleMap) {
+                        mMap = googleMap;
+                        mMap.setOnMapLoadedCallback(
+                                new GoogleMap.OnMapLoadedCallback() {
+                                    @Override
+                                    public void onMapLoaded() {
+                                        addMarkers(null);
+                                    }
+                                });
+
+                        Intent intent = getIntent();
+                        VenuesDto venuesDto =
+                                (VenuesDto) intent.getSerializableExtra(EXTRA_VENUES_DTO);
+                        mVenues = venuesDto.getResponse().getVenues();
+                        mLocation = intent.getParcelableExtra(EXTRA_LOCATION);
+
+                        mVenueFragment = (VenueFragment)
+                                getSupportFragmentManager().findFragmentById(R.id.list);
+
+                        mAdapter = new VenueRecyclerViewAdapter(mVenues, VenuesActivity.this);
+                        mVenueFragment.setAdapter(mAdapter);
+                    }
                 });
-
-        Intent intent = getIntent();
-        VenuesDto venuesDto =
-                (VenuesDto) intent.getSerializableExtra(EXTRA_VENUES_DTO);
-        mVenues = venuesDto.getResponse().getVenues();
-        mLocation = intent.getParcelableExtra(EXTRA_LOCATION);
-
-        mVenueFragment = (VenueFragment)
-                getSupportFragmentManager().findFragmentById(R.id.list);
-
-        mAdapter = new VenueRecyclerViewAdapter(mVenues, this);
-        mVenueFragment.setAdapter(mAdapter);
     }
 
-   /**
-     * Dispatch onResume() to fragments.  Note that for better inter-operation
-     * with older versions of the platform, at the point of this call the
-     * fragments attached to the activity are <em>not</em> resumed.  This means
-     * that in some cases the previous state may still be saved, not allowing
-     * fragment transactions that modify the state.  To correctly interact with
-     * fragments in their proper state, you should instead override {@link
-     * #onResumeFragments()}.
+    /**
+     * Dispatch onResume() to fragments.  Note that for better inter-operation with older
+     * versions
+     * of the platform, at the point of this call the fragments attached to the activity are
+     * <em>not</em> resumed.  This means that in some cases the previous state may still be
+     * saved,
+     * not allowing fragment transactions that modify the state.  To correctly interact with
+     * fragments in their proper state, you should instead override {@link #onResumeFragments()}.
      */
     @Override
     protected void onResume() {
@@ -142,12 +152,12 @@ public class VenuesActivity extends BaseActivity
     }
 
     /**
-     * Adds markers to the map. Adds a special red marker to mark position of
-     * current device location and a red marker to the passed venue location
-     * (optional).
+     * Adds markers to the map. Adds a special red marker to mark position of current device
+     * location and a red marker to the passed venue location (optional).
      *
      * @param selectedVenue A venue mark with a red color or null.
      */
+
     private void addMarkers(@Nullable VenueCompact selectedVenue) {
         mMarkers = new ArrayMap<>(mAdapter.getItemCount() + 1);
         mMap.clear();
@@ -216,7 +226,13 @@ public class VenuesActivity extends BaseActivity
             //        CameraUpdateFactory.newLatLngZoom(selectedLatLng, 12.0f);
             //mMap.animateCamera(cameraUpdate);
 
-            new Handler().postDelayed(() -> onMarkerClick(marker), 200);
+            new Handler().postDelayed(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            onMarkerClick(marker);
+                        }
+                    }, 200);
         } else if (userLatLng != null) {
             //CameraUpdate cameraUpdate =
             //        CameraUpdateFactory.newLatLngZoom(userLatLng, 12.0f);
@@ -298,7 +314,7 @@ public class VenuesActivity extends BaseActivity
 
         final Interpolator interpolator = new BounceInterpolator();
 
-        Handler handler = new Handler();
+        final Handler handler = new Handler();
         handler.post(new Runnable() {
             @Override
             public void run() {

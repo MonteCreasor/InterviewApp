@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -156,28 +157,34 @@ public class MainActivity extends BaseActivity
                         mGoogleApiClient, builder.build());
 
         pendingResult.setResultCallback(
-                result -> {
-                    final Status status = result.getStatus();
-                    switch (status.getStatusCode()) {
-                        case LocationSettingsStatusCodes.SUCCESS:
-                            setupLocationTracking();
-                            mFindButton.setEnabled(true);
-                            break;
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            try {
-                                status.startResolutionForResult(
-                                        MainActivity.this,
-                                        REQUEST_CHECK_SETTINGS);
-                            } catch (IntentSender.SendIntentException e) {
-                                // Ignore the error.
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            // Location settings are not satisfied. However,
-                            // we have no way to fix the settings so we
-                            // won't show the dialog.
-                            Log.w(TAG, "onResult: SETTINGS_CHANGE_UNAVAILABLE");
-                            break;
+                new ResultCallback<LocationSettingsResult>() {
+                    @Override
+                    public void onResult(@NonNull LocationSettingsResult result) {
+                        final Status status = result.getStatus();
+                        switch (status.getStatusCode()) {
+                            case LocationSettingsStatusCodes.SUCCESS:
+                                setupLocationTracking();
+                                mFindButton.setEnabled(true);
+                                break;
+                            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+
+                                try {
+                                    status.startResolutionForResult(
+                                            MainActivity.this,
+                                            REQUEST_CHECK_SETTINGS);
+                                } catch (IntentSender.SendIntentException e) {
+                                    // Ignore the error.
+                                }
+                                break;
+                            case LocationSettingsStatusCodes
+                                    .SETTINGS_CHANGE_UNAVAILABLE:
+                                // Location settings are not satisfied. However,
+                                // we have no way to fix the settings so we
+                                // won't show the dialog.
+                                Log.w(TAG,
+                                      "onResult: SETTINGS_CHANGE_UNAVAILABLE");
+                                break;
+                        }
                     }
                 });
     }
@@ -234,8 +241,8 @@ public class MainActivity extends BaseActivity
     }
 
     /**
-     * API 23 (M) callback received when a permissions request has been
-     * completed. Redirect callback to permission helper.
+     * API 23 (M) callback received when a permissions request has been completed. Redirect callback
+     * to permission helper.
      */
     @TargetApi(Build.VERSION_CODES.M)
     @Override
@@ -281,13 +288,15 @@ public class MainActivity extends BaseActivity
                 showProgress(false);
                 if (response.isSuccessful()) {
                     if (response.body().getVenues().isEmpty()) {
-                        Toast.makeText(MainActivity.this, "No venues found", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "No venues found", Toast.LENGTH_LONG)
+                                .show();
                         return;
                     }
                     startVenuesActivity(response.body());
                 } else {
                     try {
-                        Toast.makeText(MainActivity.this, response.errorBody().string(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, response.errorBody().string(),
+                                       Toast.LENGTH_LONG).show();
                         Log.e(TAG, "onResponse: " + response.errorBody());
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -347,7 +356,12 @@ public class MainActivity extends BaseActivity
 
         snackbar.setAction(
                 R.string.permissions_ok_button,
-                view -> setupLocationService());
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setupLocationService();
+                    }
+                });
 
         snackbar.show();
     }
@@ -366,13 +380,15 @@ public class MainActivity extends BaseActivity
 
         snackbar.setAction(
                 R.string.permissions_ok_button,
-                view -> {
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         /// Submit the request.
                         ActivityCompat.requestPermissions(
                                 MainActivity.this,
                                 new String[]{mLocationPermission},
                                 PERMISSION_REQUEST);
-                });
+                    }});
 
         snackbar.show();
     }

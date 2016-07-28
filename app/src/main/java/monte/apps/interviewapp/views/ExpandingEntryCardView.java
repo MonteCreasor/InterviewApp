@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -37,7 +36,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
@@ -118,11 +116,14 @@ public class ExpandingEntryCardView extends CardView {
     private List<View> mSeparators;
     private LinearLayout mContainer;
     private final OnClickListener mExpandCollapseButtonListener =
-            v -> {
-                if (mIsExpanded) {
-                    collapse();
-                } else {
-                    expand();
+            new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mIsExpanded) {
+                        collapse();
+                    } else {
+                        expand();
+                    }
                 }
             };
 
@@ -201,7 +202,7 @@ public class ExpandingEntryCardView extends CardView {
         mShowFirstEntryTypeTwice = showFirstEntryTypeTwice;
         for (List<Entry> entryList : mEntries) {
             mNumEntries += entryList.size();
-            mEntryViews.add(new ArrayList<>());
+            mEntryViews.add(new ArrayList<View>());
         }
         mCollapsedEntriesCount =
                 Math.min(numInitialVisibleEntries, mNumEntries);

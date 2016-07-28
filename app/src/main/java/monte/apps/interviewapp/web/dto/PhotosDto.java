@@ -24,7 +24,7 @@ public class PhotosDto implements Serializable {
     public List<Photo> getPhotos() {
         return getResponse() != null && getResponse().getPhotos() != null
                ? getResponse().getPhotos().getItems()
-               : new ArrayList<>();
+               : new ArrayList<Photo>();
     }
 
     public class Response implements Serializable {

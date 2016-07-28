@@ -1,7 +1,5 @@
 package monte.apps.interviewapp.activities;
 
-import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -24,12 +22,10 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import monte.apps.interviewapp.R;
-import monte.apps.interviewapp.permissions.PermissionsUtil;
 import monte.apps.interviewapp.permissions.RequestPermissionsActivity;
 import monte.apps.interviewapp.utils.ActivityUtils;
 import monte.apps.interviewapp.utils.CircleTransform;
@@ -50,34 +46,41 @@ import retrofit2.Response;
 public class DetailsActivity extends BaseActivity
         implements ExpandingEntryCardView.ExpandingEntryCardViewListener {
     public static final String MIMETYPE_SMS = "vnd.android-dir/mms-sms";
+
     /**
      * Logging tag.
      */
     private static final String TAG = "DetailsActivity";
     private static final String EXTRA_VENUE = "extra_venue";
     private static final int MAX_COMMENTS = 10;
-    private final View.OnClickListener mEntryClickHandler = v -> {
-        final Object entryTagObject = v.getTag();
-        if (entryTagObject == null
-                || !(entryTagObject instanceof ExpandingEntryCardView.EntryTag)) {
-            Log.w(TAG, "EntryTag was not used correctly");
-            return;
-        }
-        final EntryTag entryTag = (EntryTag) entryTagObject;
-        final Intent intent = entryTag.getIntent();
 
-        // All action activities are started as a new task.
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        if (Intent.ACTION_CALL.equals(intent.getAction())) {
-            if (RequestPermissionsActivity.requestPermissionAndStartAction(this, intent)) {
+    private final View.OnClickListener mEntryClickHandler = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final Object entryTagObject = v.getTag();
+            if (entryTagObject == null
+                    || !(entryTagObject instanceof ExpandingEntryCardView.EntryTag)) {
+                Log.w(TAG, "EntryTag was not used correctly");
                 return;
             }
-        }
+            final EntryTag entryTag = (EntryTag) entryTagObject;
+            final Intent intent = entryTag.getIntent();
 
-        // Launch the activity.
-        ActivityUtils.startActivityWithErrorToast(this, intent);
+            // All action activities are started as a new task.
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            if (Intent.ACTION_CALL.equals(intent.getAction())) {
+                if (RequestPermissionsActivity.requestPermissionAndStartAction(
+                        DetailsActivity.this, intent)) {
+                    return;
+                }
+            }
+
+            // Launch the activity.
+            ActivityUtils.startActivityWithErrorToast(DetailsActivity.this, intent);
+        }
     };
+
     @BindView(R.id.photo_image_view)
     ImageView mImageView;
     @BindView(R.id.toolbar_layout)
@@ -96,7 +99,6 @@ public class DetailsActivity extends BaseActivity
     NestedScrollView mNestedScrollView;
     private VenueCompact mVenue;
     private VenueComplete mVenueComplete;
-    private CompletableFuture<Void> mDetailsFuture;
 
     public static Intent makeIntent(Context context, @NonNull VenueCompact venue) {
         final Intent intent = new Intent(context, DetailsActivity.class);
@@ -120,25 +122,7 @@ public class DetailsActivity extends BaseActivity
 
         initializeViews();
 
-        mDetailsFuture =
-                CompletableFuture.supplyAsync(() -> loadFullDetails(mVenue.getId()))
-                        .exceptionally(throwable -> null)
-                        .thenAccept(
-                                response -> runOnUiThread(
-                                        () -> loadCompleteVenue(response)));
-
-        PermissionsUtil.registerPermissionReceiver(this, new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
-                                                  "TODO: Just a test .... ",
-                                                  Snackbar.LENGTH_LONG);
-                snackbar.setAction("Settings", view -> startActivity(
-                        IntentUtils.getAppSettingsIntent(DetailsActivity.this)));
-                snackbar.show();
-            }
-
-        }, Manifest.permission.CALL_PHONE);
+        loadFullDetailsAsync();
     }
 
     private VenueComplete loadFullDetails(String id) {
@@ -154,9 +138,6 @@ public class DetailsActivity extends BaseActivity
     @Override
     protected void onStop() {
         super.onStop();
-        if (!mDetailsFuture.isDone()) {
-            mDetailsFuture.cancel(true);
-        }
     }
 
     private void loadFullDetailsAsync() {
@@ -165,9 +146,7 @@ public class DetailsActivity extends BaseActivity
                         .getVenue(mVenue.getId());
         venueDto.enqueue(new Callback<VenueDto>() {
             @Override
-            public void onResponse(
-                    Call<VenueDto> call, Response<VenueDto> response) {
-                Log.d(TAG, "onResponse: ");
+            public void onResponse(Call<VenueDto> call, Response<VenueDto> response) {
                 VenueDto venueDto = response.body();
                 if (venueDto != null) {
                     loadCompleteVenue(venueDto.getVenue());
@@ -286,7 +265,7 @@ public class DetailsActivity extends BaseActivity
                 continue;
             }
 
-            entries.add(new ArrayList<>(1));
+            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
 
             ExpandingEntryCardView.Builder builder = new ExpandingEntryCardView.Builder();
             builder.id(-1);
@@ -370,7 +349,7 @@ public class DetailsActivity extends BaseActivity
             }
             */
 
-            entries.add(new ArrayList<>(1));
+            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -384,7 +363,7 @@ public class DetailsActivity extends BaseActivity
             );
 
             if (location.getDistance() > 0) {
-                entries.add(new ArrayList<>(1));
+                entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
                 entries.get(entries.size() - 1).add(
                         new ExpandingEntryCardView.Builder()
                                 .id(-1)
@@ -397,7 +376,7 @@ public class DetailsActivity extends BaseActivity
             }
 
             if (!TextUtils.isEmpty(location.getCrossStreet())) {
-                entries.add(new ArrayList<>(1));
+                entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
                 entries.get(entries.size() - 1).add(
                         new ExpandingEntryCardView.Builder()
                                 .id(-1)
@@ -426,7 +405,7 @@ public class DetailsActivity extends BaseActivity
             final Drawable phoneIcon =
                     ContextCompat.getDrawable(this, android.R.drawable.ic_menu_call)
                             .mutate();
-            entries.add(new ArrayList<>(1));
+            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -440,7 +419,7 @@ public class DetailsActivity extends BaseActivity
         }
 
         if (!TextUtils.isEmpty(contact.getFacebook())) {
-            entries.add(new ArrayList<>(1));
+            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -456,7 +435,7 @@ public class DetailsActivity extends BaseActivity
         }
 
         if (!TextUtils.isEmpty(contact.getTwitter())) {
-            entries.add(new ArrayList<>(1));
+            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()
                             .id(-1)
@@ -477,7 +456,7 @@ public class DetailsActivity extends BaseActivity
 
         if (venue.getStats() != null) {
             VenueCompact.Stats stats = venue.getStats();
-            entries.add(new ArrayList<>());
+            entries.add(new ArrayList<ExpandingEntryCardView.Entry>(1));
 
             entries.get(entries.size() - 1).add(
                     new ExpandingEntryCardView.Builder()

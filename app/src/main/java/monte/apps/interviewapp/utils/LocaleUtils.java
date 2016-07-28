@@ -48,7 +48,7 @@ public class LocaleUtils {
                 precision = 0;
             }
         } else {
-            distance = (float)UnitUtils.convertKmToMi.applyAsDouble(distance);
+            distance = (float)UnitUtils.convertKmToMi(distance);
 
             if (distance * UnitUtils.FEET_PER_MILE > 1000) {
                 format = context.getString(R.string.distance_in_miles);

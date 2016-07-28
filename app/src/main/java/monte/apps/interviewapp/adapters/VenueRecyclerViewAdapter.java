@@ -21,7 +21,9 @@ import monte.apps.interviewapp.web.dto.VenueCompact;
 
 public class VenueRecyclerViewAdapter
         extends RecyclerView.Adapter<VenueRecyclerViewAdapter.ViewHolder> {
-    /** Logging tag. */
+    /**
+     * Logging tag.
+     */
     private static final String TAG = "VenueRecyclerViewAdapter";
 
     private final List<VenueCompact> mValues;
@@ -42,18 +44,16 @@ public class VenueRecyclerViewAdapter
     }
 
     /**
-     * Called when a view created by this adapter has been recycled.
-     * <p>
-     * <p>A view is recycled when a {@link LayoutManager} decides that it no longer needs to be
-     * attached to its parent {@link RecyclerView}. This can be because it has fallen out of
-     * visibility or a set of cached views represented by views still attached to the parent
-     * RecyclerView. If an item view has large or expensive data bound to it such as large bitmaps,
-     * this may be a good place to release those resources.</p>
+     * Called when a view created by this adapter has been recycled. <p> <p>A view is recycled when
+     * a {@link LayoutManager} decides that it no longer needs to be attached to its parent {@link
+     * RecyclerView}. This can be because it has fallen out of visibility or a set of cached views
+     * represented by views still attached to the parent RecyclerView. If an item view has large or
+     * expensive data bound to it such as large bitmaps, this may be a good place to release those
+     * resources.</p>
      * <p>
      * RecyclerView calls this method right before clearing ViewHolder's internal data and sending
      * it to RecycledViewPool. This way, if ViewHolder was holding valid information before being
-     * recycled, you can call {@link ViewHolder#getAdapterPosition()} to
-     * get its adapter position.
+     * recycled, you can call {@link ViewHolder#getAdapterPosition()} to get its adapter position.
      *
      * @param holder The ViewHolder for the view being recycled
      */
@@ -108,20 +108,26 @@ public class VenueRecyclerViewAdapter
 
         holder.mNameTextView.setText(venue.getName());
 
-        holder.mView.setOnClickListener(v -> {
-            if (null != mListener) {
-                mListener.onVenueClicked(venue);
-            }
-        });
+        holder.mView.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mListener != null) {
+                            mListener.onVenueClicked(venue);
+                        }
+                    }
+                });
 
-        holder.mView.setOnLongClickListener(view -> {
-            if (null != mListener) {
-                mListener.onVenueLongClicked(venue);
-                return true;
-            }
-
-            return false;
-        });
+        holder.mView.setOnLongClickListener(
+                new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if (mListener != null) {
+                            mListener.onVenueLongClicked(venue);
+                        }
+                        return true;
+                    }
+                });
     }
 
     @Override

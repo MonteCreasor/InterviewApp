@@ -244,25 +244,30 @@ public abstract class BaseActivity extends AppCompatActivity
         animator.setStartDelay(0);
         animator.setDuration(colorMorphDuration);
         animator.addUpdateListener(
-                animation -> {
-                    final float animatedFraction = animation.getAnimatedFraction();
+                new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        final float animatedFraction =
+                                animation.getAnimatedFraction();
 
-                    // Set StatusBar color on Lollipop
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        int statusBarColor = ColorUtils.blendColors(
-                                startStatusBarColor,
-                                endStatusBarColor,
-                                animatedFraction);
-                        ColorUtils.setStatusBarColor(getWindow(), statusBarColor);
-                    }
+                        // Set StatusBar color on Lollipop
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            int statusBarColor = ColorUtils.blendColors(
+                                    startStatusBarColor,
+                                    endStatusBarColor,
+                                    animatedFraction);
+                            ColorUtils.setStatusBarColor(getWindow(),
+                                                         statusBarColor);
+                        }
 
-                    // Set the ActionBar color (only in two-pane mode)
-                    if (isTaskRoot() && mToolbar != null) {
-                        int actionBarColor1 = ColorUtils.blendColors(
-                                startActionBarColor,
-                                endActionBarColor,
-                                animatedFraction);
-                        mToolbar.setBackgroundColor(actionBarColor1);
+                        // Set the ActionBar color (only in two-pane mode)
+                        if (isTaskRoot() && mToolbar != null) {
+                            int actionBarColor1 = ColorUtils.blendColors(
+                                    startActionBarColor,
+                                    endActionBarColor,
+                                    animatedFraction);
+                            mToolbar.setBackgroundColor(actionBarColor1);
+                        }
                     }
                 });
         animator.start();
@@ -270,11 +275,13 @@ public abstract class BaseActivity extends AppCompatActivity
 
     /**
      * Should be called by base class once the activity's main image has been loaded. This will
-     * trigger a background palette generation that will eventually morph the action and status
-     * bar colors to match the image palette.
+     * trigger a background palette generation that will eventually morph the action and
+     * status bar
+     * colors to match the image palette.
      *
      * @param bitmap Image to extract a matching theme palette.
      */
+
     public void updatePalette(Bitmap bitmap) {
 
     }

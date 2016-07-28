@@ -20,12 +20,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class FourSquareClient {
-    /** Logging tag. */
-    private static final String TAG = "FourSquareClient";
-
     public static final String VERSION = "20160718";
     public static final int ICON_SIZE = 64;
-
+    /**
+     * Logging tag.
+     */
+    private static final String TAG = "FourSquareClient";
     /**
      * Base URL for FourSquare query service.
      */
@@ -39,12 +39,10 @@ public class FourSquareClient {
             "5BTQVHFWLCQGMQPPZXTSAI4JT0AADCPBHCBC0RCKTP1DLLJX";
     private static final String VERSION_PARAM = "v";
 
-
     private static FourSquareApi sFourSquareApi;
 
     /**
-     * Rest adapter for FourSquare server. The API key is automatically added to
-     * each query.
+     * Rest adapter for FourSquare server. The API key is automatically added to each query.
      *
      * @return
      */
@@ -55,22 +53,26 @@ public class FourSquareClient {
         }
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-        httpClient.addInterceptor(chain -> {
-            Request original = chain.request();
-            HttpUrl originalHttpUrl = original.url();
+        httpClient.addInterceptor(
+                new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        Request original = chain.request();
+                        HttpUrl originalHttpUrl = original.url();
 
-            HttpUrl url = originalHttpUrl.newBuilder()
-                    .addQueryParameter(CLIENT_ID_PARAM, ClientID)
-                    .addQueryParameter(CLIENT_SECRET_PARAM, ClientSecret)
-                    .addQueryParameter(VERSION_PARAM, VERSION)
-                    .build();
+                        HttpUrl url = originalHttpUrl.newBuilder()
+                                .addQueryParameter(CLIENT_ID_PARAM, ClientID)
+                                .addQueryParameter(CLIENT_SECRET_PARAM, ClientSecret)
+                                .addQueryParameter(VERSION_PARAM, VERSION)
+                                .build();
 
-            // Request customization: add api key and secret.
-            Request.Builder requestBuilder = original.newBuilder().url(url);
-            Request request = requestBuilder.build();
-            Log.d(TAG, "Get URL: " + url);
-            return chain.proceed(request);
-        });
+                        // Request customization: add api key and secret.
+                        Request.Builder requestBuilder = original.newBuilder().url(url);
+                        Request request = requestBuilder.build();
+                        Log.d(TAG, "Get URL: " + url);
+                        return chain.proceed(request);
+                    }
+                });
 
         /*
                 client.interceptors().add(new Interceptor() {

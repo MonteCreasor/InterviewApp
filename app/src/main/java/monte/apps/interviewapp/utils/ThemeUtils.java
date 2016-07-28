@@ -20,9 +20,10 @@ public class ThemeUtils {
     public static final String PREF_USE_DYNAMIC_BACKGROUND_PALETTE = "dynamic_background_palette";
     public static final String PREF_USE_DYNAMIC_TEXT_PALETTE = "dynamic_text_palette";
 
-    public static void updateThemePalette(final Activity activity,
-                                          final ColorUtils.PaletteSwatch palette,
-                                          float expansionFraction) {
+    public static void updateThemePalette(
+            final Activity activity,
+            final ColorUtils.PaletteSwatch palette,
+            float expansionFraction) {
 
         final View actionBarView = getActionBarView(activity);
 
@@ -30,8 +31,8 @@ public class ThemeUtils {
         if (actionBarView != null) {
             ColorDrawable colorDrawable = (ColorDrawable) actionBarView.getBackground();
             actionBarColor = colorDrawable != null ?
-                    colorDrawable.getColor() :
-                    actionBarView.getDrawingCacheBackgroundColor();
+                             colorDrawable.getColor() :
+                             actionBarView.getDrawingCacheBackgroundColor();
         }
 
         final int startActionBarColor = actionBarColor;
@@ -66,25 +67,31 @@ public class ThemeUtils {
         animator.setDuration(colorMorphDuration);
 
         animator.addUpdateListener(
-                animation -> {
-                    final float animatedFraction = animation.getAnimatedFraction();
+                new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
 
-                    // Set StatusBar color on Lollipop
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        int statusBarColor = ColorUtils.blendColors(
-                                startStatusBarColor,
-                                endStatusBarColor,
-                                animatedFraction);
-                        ColorUtils.setStatusBarColor(activity.getWindow(), statusBarColor);
-                    }
+                        final float animatedFraction =
+                                animation.getAnimatedFraction();
 
-                    // Set the ActionBar color (only in two-pane mode)
-                    if (activity.isTaskRoot() && actionBarView != null) {
-                        int actionBarColor1 = ColorUtils.blendColors(
-                                startActionBarColor,
-                                endActionBarColor,
-                                animatedFraction);
-                        actionBarView.setBackgroundColor(actionBarColor1);
+                        // Set StatusBar color on Lollipop
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            int statusBarColor = ColorUtils.blendColors(
+                                    startStatusBarColor,
+                                    endStatusBarColor,
+                                    animatedFraction);
+                            ColorUtils.setStatusBarColor(activity.getWindow(),
+                                                         statusBarColor);
+                        }
+
+                        // Set the ActionBar color (only in two-pane mode)
+                        if (activity.isTaskRoot() && actionBarView != null) {
+                            int actionBarColor1 = ColorUtils.blendColors(
+                                    startActionBarColor,
+                                    endActionBarColor,
+                                    animatedFraction);
+                            actionBarView.setBackgroundColor(actionBarColor1);
+                        }
                     }
                 });
         animator.start();
@@ -106,10 +113,6 @@ public class ThemeUtils {
         }
     }
 
-    public interface IToolbarHolder {
-        android.support.v7.widget.Toolbar getToolbar();
-    }
-
     /**
      * Get current status bar color.
      *
@@ -121,5 +124,9 @@ public class ThemeUtils {
         } else {
             return 0;
         }
+    }
+
+    public interface IToolbarHolder {
+        android.support.v7.widget.Toolbar getToolbar();
     }
 }
